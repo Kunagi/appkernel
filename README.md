@@ -5,10 +5,25 @@ Minimalistic Clojure/Clojurescript application framework.
 
 ## Motivation
 
-We want to build multiple applications while sharing coding patterns and code.
+1. We want to build multiple applications
+1. We want to share code (domain logic and UI)
+1. We want to share coding patterns
+1. We want our domain logic to be runnable on the server and the client
 
-We want do organize our applications as modules, which provide extensions
-usable by other modules.
+
+## Overview
+
+An application consists of modules.
+
+Modules provide user interface components, query handlers and command handlers
+and event handlers.
+
+User interface components issue queries and trigger commands.
+
+Command handlers create events.
+
+The appkernel framework provides an API for querying, for command execution
+and for definition of modules.
 
 
 ## Documentation

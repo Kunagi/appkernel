@@ -3,6 +3,14 @@
 Minimalistic Clojure/Clojurescript application framework.
 
 
+## Motivation
+
+We want to build multiple applications while sharing coding patterns and code.
+
+We want do organize our applications as modules, which provide extensions
+usable by other modules.
+
+
 ## Documentation
 
 `appkernel` provides a common API for issuing commands and queries. Extensions

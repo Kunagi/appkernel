@@ -9,6 +9,7 @@
 (defn integrate-responder-to-result
   "Runs the responders function and integrates the result."
   [db result responder]
+  ;;TODO try-catch
   (let [query-args (get-in result [:query :args])
         f (:f responder)
         response-value (f db query-args)
@@ -19,6 +20,7 @@
 
 (defn execute-query-sync
   [db query]
+  ;; TODO conform query
   (let [query-name (first query)
         responders (registration/query-responders-by-query-name db query-name)
         result {:query query

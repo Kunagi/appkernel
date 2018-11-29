@@ -5,6 +5,7 @@
    [appkernel.registration :as registration]
    [appkernel.query-responder :as query-responder]
    [appkernel.querying]
+   [appkernel.eventhandling]
    [appkernel.transacting]))
 
 

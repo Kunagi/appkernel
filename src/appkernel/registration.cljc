@@ -5,6 +5,7 @@
 
    [appkernel.integration :as integration]
    [appkernel.query-responder :as query-responder]
+   [appkernel.event-handler :as event-handler]
    [appkernel.command-handler :as command-handler]))
 
 
@@ -28,6 +29,27 @@
   [db query-name]
   (get-in db [:appkernel/query-responders query-name]))
 
+
+
+;;; events
+
+
+(defn reg-event-handler
+  [db handler]
+  (let [handler (event-handler/conform handler)
+        event-name (:event handler)]
+    (update-in db [:appkernel/event-handlers event-name] conj handler)))
+
+
+(defn def-event-handler
+  [db handler]
+  (integration/update-db #(reg-event-handler % handler)))
+
+
+(defn event-handlers-by-event-name
+  "Provides all event handlers for a given event name."
+  [db event-name]
+  (get-in db [:appkernel/event-handlers event-name]))
 
 
 ;;; commands

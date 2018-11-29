@@ -1,4 +1,6 @@
-(ns appkernel.integration)
+(ns appkernel.integration
+  "Default implementation for the app-db. Hook-in atoms for integration into
+  re-frame.")
 
 (defonce !app-db (atom {}))
 
@@ -8,10 +10,12 @@
 
 
 (defn update-db
+  "Update the app-db by calling `f` on it."
   [f]
   (@!update-db f))
 
 
 (defn db
+  "Get the current app-db."
   []
   (@!db))

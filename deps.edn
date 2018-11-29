@@ -1,2 +1,2 @@
-{:deps {witek/bindscript {:mvn/version "1.0.3"}}
+{:deps {witek/bindscript {:local/root "/p/bindscript"}}
  :paths ["src" "target"]}

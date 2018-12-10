@@ -9,6 +9,9 @@
 (defonce !db (atom (fn [] @!app-db)))
 
 
+;; TODO (defn integrate ) -> move all content from app-db to new app-db
+
+
 (defn update-db
   "Update the app-db by calling `f` on it."
   [f]

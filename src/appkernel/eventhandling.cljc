@@ -1,4 +1,3 @@
-
 (ns appkernel.eventhandling
   (:require
    [clojure.spec.alpha :as s]
@@ -40,6 +39,11 @@
         handlers (registration/event-handlers-by-event-name db event-name)
         reducer (partial process-event-handler event)]
     (reduce reducer db handlers)))
+
+
+(defn handle-events
+  [db events]
+  (reduce handle-event db events))
 
 
 (def-bindscript ::full-stack

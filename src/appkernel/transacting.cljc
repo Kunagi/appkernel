@@ -2,7 +2,8 @@
   (:require
    [bindscript.api :refer [def-bindscript]]
 
-   [appkernel.registration :as registration]))
+   [appkernel.registration :as registration]
+   [appkernel.eventhandling :as eventhandling]))
 
 
 (defn- new-tx
@@ -39,8 +40,21 @@
                         ex))))))
 
 
+(defn- handle-events
+  [tx]
+  (let [db (:db tx)
+        events (:events tx)]
+    (assoc tx :db
+      (eventhandling/handle-events db events))))
+
+
 (defn transact
   [db command]
   (-> (new-tx db command)
       (load-command-handler)
-      (run-command-handler)))
+      (run-command-handler)
+      (handle-events)))
+
+
+(defn transact!
+  [command])

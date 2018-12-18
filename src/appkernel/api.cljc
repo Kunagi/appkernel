@@ -9,6 +9,11 @@
    [appkernel.transacting :as transacting]))
 
 
+(defn def-event-handler
+  [name & {:as event-handler}]
+  (registration/def-event-handler (assoc event-handler :name name)))
+
+
 (defn def-query-responder
   [name & {:as responder}]
   (registration/def-query-responder (assoc responder :name name)))

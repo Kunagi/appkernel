@@ -42,7 +42,7 @@
 
 
 (defn def-event-handler
-  [db handler]
+  [handler]
   (integration/update-db #(reg-event-handler % handler)))
 
 

@@ -14,6 +14,6 @@
       (throw (ex-info (str "Event handler " handler-name " is missing :event.")
                       {:handler handler})))
     (if-not f
-      (throw (ex-info (str "Query handler " handler-name " is missing :f.")
+      (throw (ex-info (str "Event handler " handler-name " is missing :f.")
                       {:handler handler})))
     handler))

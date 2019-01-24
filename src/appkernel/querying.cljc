@@ -57,3 +57,8 @@
   result      (execute-query-sync db query)
   all-values  (responses-from-result-merged result)
   :spec       #(= (into #{} %) #{:a :b :c :x :y :z}))
+
+
+(defn execute-query-sync-and-merge-results
+  [db query]
+  (responses-from-result-merged (execute-query-sync db query)))

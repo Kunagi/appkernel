@@ -47,7 +47,7 @@
 
 
 (def-bindscript ::full-stack
-  db          {:stuff []}
+  db          {:stuff #{}}
   event       [:some/event {:param-1 23}]
 
   result      (handle-event db event)
@@ -64,4 +64,4 @@
 
   db          (handle-event db event)
   stuff       (:stuff db)
-  :spec       #(= % ["h2" "h1"]))
+  :spec       #(= % #{"h1" "h2"}))

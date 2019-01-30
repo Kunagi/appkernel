@@ -1,4 +1,3 @@
-
 (ns appkernel.event
   (:require
    [clojure.spec.alpha :as s]

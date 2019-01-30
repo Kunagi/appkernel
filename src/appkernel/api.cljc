@@ -5,7 +5,7 @@
    [appkernel.registration :as registration]
    [appkernel.query-responder :as query-responder]
    [appkernel.querying :as querying]
-   [appkernel.eventhandling]
+   [appkernel.eventhandling :as eventhandling]
    [appkernel.transacting :as transacting]))
 
 ;;; query
@@ -36,3 +36,40 @@
   "Execute command and transact."
   [command]
   (transacting/transact! command))
+
+
+;;; projections
+
+(defn def-projector
+  [name & {:as projector}]
+  (registration/def-projector (assoc projector :name name)))
+
+
+(def-bindscript ::projecting
+  db          {:stuff #{}}
+  event-1     [:some/event-1 {:param-1 23}]
+  event-2     [:some/event-2 {:param-1 23}]
+
+  result      (eventhandling/handle-event db event-1)
+
+  handler-1   {:event :some/event-1
+               :f (fn [projection args]
+                     (assoc projection :h1 true))}
+  handler-2   {:event :some/event-2
+               :f (fn [projection args]
+                    (assoc projection :h2 true))}
+
+  projector   {:name :some/projection
+               :event-handlers [handler-1 handler-2]}
+
+  db          (registration/reg-projector db projector)
+
+  db          (eventhandling/handle-event db event-1)
+  db          (eventhandling/handle-event db event-2)
+
+  projection  (get-in db [:appkernel/projections :some/projection {}])
+
+  :spec       #(= % {:name :some/projection
+                     :args {}
+                     :h1 true
+                     :h2 true}))

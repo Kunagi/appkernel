@@ -6,6 +6,7 @@
    [appkernel.integration :as integration]
    [appkernel.query-responder :as query-responder]
    [appkernel.event-handler :as event-handler]
+   [appkernel.projector :as projector]
    [appkernel.command-handler :as command-handler]))
 
 
@@ -37,8 +38,8 @@
 (defn reg-event-handler
   [db handler]
   (let [handler (event-handler/conform handler)
-        event-name (:event handler)]
-    (update-in db [:appkernel/event-handlers event-name] conj handler)))
+        handler-name (:name handler)]
+    (assoc-in db [:appkernel/event-handlers handler-name] handler)))
 
 
 (defn def-event-handler
@@ -49,7 +50,31 @@
 (defn event-handlers-by-event-name
   "Provides all event handlers for a given event name."
   [db event-name]
-  (get-in db [:appkernel/event-handlers event-name]))
+  (->> (get db :appkernel/event-handlers)
+       (vals)
+       (filter #(= event-name (:event %)))))
+
+
+;;; projections
+
+
+(defn- reg-projector-event-handlers
+  [db projector]
+  (reduce reg-event-handler db (:event-handlers projector)))
+
+
+(defn reg-projector
+  [db projector]
+  (let [projector (projector/conform projector)
+        projector-name (:name projector)]
+    (-> db
+        (assoc-in [:appkernel/projectors projector-name] projector)
+        (reg-projector-event-handlers projector))))
+
+
+(defn def-projector
+  [projector]
+  (integration/update-db #(reg-projector % projector)))
 
 
 ;;; commands

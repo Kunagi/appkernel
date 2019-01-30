@@ -16,8 +16,8 @@
 (defn reg-query-responder
   [db responder]
   (let [responder (query-responder/conform responder)
-        query-name (:query responder)]
-    (update-in db [:appkernel/query-responders query-name] conj responder)))
+        responder-name (:name responder)]
+    (assoc-in db [:appkernel/query-responders responder-name] responder)))
 
 
 (defn def-query-responder
@@ -28,8 +28,9 @@
 (defn query-responders-by-query-name
   "Provides all responders for a given query name."
   [db query-name]
-  (get-in db [:appkernel/query-responders query-name]))
-
+  (->> (get db :appkernel/query-responders)
+       (vals)
+       (filter #(= query-name (:query %)))))
 
 
 ;;; events
@@ -69,7 +70,8 @@
         projector-name (:name projector)]
     (-> db
         (assoc-in [:appkernel/projectors projector-name] projector)
-        (reg-projector-event-handlers projector))))
+        (reg-projector-event-handlers projector)
+        (reg-query-responder (:query-responder projector)))))
 
 
 (defn def-projector

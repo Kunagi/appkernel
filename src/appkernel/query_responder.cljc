@@ -9,6 +9,9 @@
   (let [responder-name (:name responder)
         query-name (:query responder)
         f (:f responder)]
+    (if-not responder-name
+      (throw (ex-info (str "Query responder  is missing :name.")
+                      {:responder responder})))
     (if-not query-name
       (throw (ex-info (str "Query responder " responder-name " is missing :query.")
                       {:responder responder})))

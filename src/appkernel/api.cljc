@@ -67,7 +67,9 @@
   db          (eventhandling/handle-event db event-1)
   db          (eventhandling/handle-event db event-2)
 
-  projection  (get-in db [:appkernel/projections :some/projection {}])
+  projection  (first (querying/execute-query-sync-and-merge-results
+                      db
+                      [:some/projection {}]))
 
   :spec       #(= % {:name :some/projection
                      :args {}

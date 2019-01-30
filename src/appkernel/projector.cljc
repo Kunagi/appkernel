@@ -14,7 +14,8 @@
     (assoc event-handler :name (keyword name-namespace name-name))))
 
 
-(defn- conform-event-handler
+(defn- promote-event-handler
+  "Convert projector `event-handler` to db event handler."
   [event-handler projector]
   (let [event-name (:event event-handler)
         f (:f event-handler)
@@ -43,6 +44,16 @@
         (event-handler/conform))))
 
 
+(defn new-query-responder
+  [projector]
+  (let [name (:name projector)]
+    {:name name
+     :query name
+     :f (fn [db args]
+          (let [args (if (nil? args) {} args)]
+            [(get-in db [:appkernel/projections name args])]))}))
+
+
 (defn conform
   [projector]
   (let [projector-name (:name projector)
@@ -55,7 +66,6 @@
                       {:projector projector})))
     (-> projector
         (assoc :event-handlers
-               (mapv #(conform-event-handler % projector)
-                     event-handlers)))))
-
-
+               (mapv #(promote-event-handler % projector)
+                     event-handlers))
+        (assoc :query-responder (new-query-responder projector)))))

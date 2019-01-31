@@ -39,6 +39,7 @@
 
 (defn reg-event-handler
   [db handler]
+  (tap> [::reg-event-handler (:name handler)])
   (let [handler (event-handler/conform handler)
         handler-name (:name handler)]
     (assoc-in db [:appkernel/event-handlers handler-name] handler)))
@@ -67,6 +68,7 @@
 
 (defn reg-projector
   [db projector]
+  (tap> [::reg-projector (:name projector)])
   (let [projector (projector/conform projector)
         projector-name (:name projector)]
     (-> db
@@ -85,6 +87,7 @@
 
 (defn reg-command-handler
   [db handler]
+  (tap> [::reg-command-handler (:name handler)])
   (let [handler (command-handler/conform handler)
         command-name (:command handler)]
     (assoc-in db [:appkernel/command-handlers command-name] handler)))

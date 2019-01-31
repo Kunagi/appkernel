@@ -58,6 +58,7 @@
 
 (defn transact
   [db command]
+  (tap> [::transact command])
   (-> (new-tx db command)
       (load-command-handler)
       (load-aggregate)
@@ -67,7 +68,8 @@
 
 
 (defn transact!
-  [command])
+  [command]
+  (tap> [::transact! :error command]))
 
 
 (def-bindscript ::full-stack

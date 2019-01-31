@@ -20,6 +20,7 @@
 
 (defn execute-query-sync
   [db query]
+  (tap> [::execute-query-sync query])
   ;; TODO conform query
   (let [query-name (first query)
         responders (registration/query-responders-by-query-name db query-name)

@@ -1,6 +1,8 @@
 (ns appkernel.integration
   "Default implementation for the app-db. Hook-in atoms for integration into
-  re-frame.")
+  re-frame."
+  (:require
+   [appkernel.logging]))
 
 (defonce !app-db (atom {}))
 
@@ -15,6 +17,7 @@
 (defn integrate!
   "Installs `db-fn` and `update-db-fn`, returns current state of db."
   [db-fn update-db-fn]
+  (tap> ::integrate!)
   (let [db (@!db)]
     (reset! !db db-fn)
     (reset! !update-db update-db-fn)

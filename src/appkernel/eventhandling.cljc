@@ -34,6 +34,7 @@
 
 (defn handle-event
   [db event]
+  (tap> [::handle-event event])
   ;; TODO conform event
   (let [event-name (first event)
         handlers (registration/event-handlers-by-event-name db event-name)

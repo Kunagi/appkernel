@@ -1,5 +1,6 @@
 (ns appkernel.browserapp
   (:require
+   [appkernel.logging]
    [appkernel.api]))
 
 (.log js/console "loading browserapp")

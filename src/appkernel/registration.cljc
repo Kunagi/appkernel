@@ -15,6 +15,7 @@
 
 (defn reg-query-responder
   [db responder]
+  (tap> [::reg-query-responder (:name responder)])
   (let [responder (query-responder/conform responder)
         responder-name (:name responder)]
     (assoc-in db [:appkernel/query-responders responder-name] responder)))

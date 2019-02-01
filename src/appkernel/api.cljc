@@ -46,12 +46,15 @@
 (defn dispatch
   [event]
   (tap> [::dispatch event])
-  (eventhandling/handle-event (integration/db) event))
+  (if-let [dispatch-f (integration/dispatch-f)]
+    (dispatch-f event)
+    (eventhandling/handle-event (integration/db) event)))
 
 
 (defn def-event-handler
   [name & {:as event-handler}]
   (registration/def-event-handler (assoc event-handler :name name)))
+
 
 
 ;;; command
@@ -67,11 +70,28 @@
   (transacting/transact! command))
 
 
+
 ;;; projections
 
 (defn def-projector
   [name & {:as projector}]
   (registration/def-projector (assoc projector :name name)))
+
+
+
+;;; models
+
+
+(defn def-eventmodel
+  [name & {:as model}]
+  (registration/def-eventmodel (assoc model :name name)))
+
+
+
+;;; app startup
+
+
+(def-eventmodel :app/started)
 
 
 (defn start!
@@ -89,6 +109,10 @@
 
 (def-bindscript ::projecting
   db          {:stuff #{}}
+
+  db          (registration/reg-eventmodel db {:name :some/event-1})
+  db          (registration/reg-eventmodel db {:name :some/event-2})
+
   event-1     {:app/event :some/event-1 :param-1 23}
   event-2     {:app/event :some/event-2 :param-1 23}
 

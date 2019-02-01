@@ -7,7 +7,34 @@
    [appkernel.query-responder :as query-responder]
    [appkernel.event-handler :as event-handler]
    [appkernel.projector :as projector]
-   [appkernel.command-handler :as command-handler]))
+   [appkernel.command-handler :as command-handler]
+   [appkernel.eventmodel :as eventmodel]))
+
+
+;;; models
+
+(defn- reg-model
+  [db model type conform-f]
+  (let [model (conform-f model)
+        model-name (:name model)]
+    (assoc-in db [:appkernel/models type model-name] model)))
+
+
+(defn model-by-name
+  [db type model-name]
+  (get-in db [:appkernel/models type model-name]))
+
+
+(defn reg-eventmodel
+  [db model]
+  (reg-model db model :event eventmodel/conform))
+
+
+(defn def-eventmodel
+  [model]
+  (tap> [::def-eventmodel (:name model)])
+  (integration/update-db #(reg-eventmodel % model)))
+
 
 
 ;;; queries
@@ -15,7 +42,6 @@
 
 (defn reg-query-responder
   [db responder]
-  (tap> [::reg-query-responder (:name responder)])
   (let [responder (query-responder/conform responder)
         responder-name (:name responder)]
     (assoc-in db [:appkernel/query-responders responder-name] responder)))
@@ -23,6 +49,7 @@
 
 (defn def-query-responder
   [responder]
+  (tap> [::def-query-responder (:name responder)])
   (integration/update-db #(reg-query-responder % responder)))
 
 
@@ -39,7 +66,6 @@
 
 (defn reg-event-handler
   [db handler]
-  (tap> [::reg-event-handler (:name handler)])
   (let [handler (event-handler/conform handler)
         handler-name (:name handler)]
     (assoc-in db [:appkernel/event-handlers handler-name] handler)))
@@ -47,6 +73,7 @@
 
 (defn def-event-handler
   [handler]
+  (tap> [::def-event-handler (:name handler)])
   (integration/update-db #(reg-event-handler % handler)))
 
 
@@ -68,7 +95,6 @@
 
 (defn reg-projector
   [db projector]
-  (tap> [::reg-projector (:name projector)])
   (let [projector (projector/conform projector)
         projector-name (:name projector)]
     (-> db
@@ -79,6 +105,7 @@
 
 (defn def-projector
   [projector]
+  (tap> [::def-projector (:name projector)])
   (integration/update-db #(reg-projector % projector)))
 
 
@@ -87,7 +114,6 @@
 
 (defn reg-command-handler
   [db handler]
-  (tap> [::reg-command-handler (:name handler)])
   (let [handler (command-handler/conform handler)
         command-name (:command handler)]
     (assoc-in db [:appkernel/command-handlers command-name] handler)))
@@ -95,9 +121,12 @@
 
 (defn def-command-handler
   [handler]
+  (tap> [::def-command-handler (:name handler)])
   (integration/update-db #(reg-command-handler % handler)))
 
 
 (defn command-handler-by-command-name
   [db command-name]
   (get-in db [:appkernel/command-handlers command-name]))
+
+

@@ -4,6 +4,7 @@
    [bindscript.api :refer [def-bindscript]]
 
    [appkernel.event :as event]
+   [appkernel.eventvalidation :as eventvalidation]
    [appkernel.registration :as registration]))
 
 
@@ -32,23 +33,41 @@
     event))
 
 
-(defn handle-event
+(defn- handle-event-
   [db event]
-  (tap> [::handle-event event])
-  (let [event (event/conform event)
-        event-name (:app/event event)
+  (let [event-name (:app/event event)
         handlers (registration/event-handlers-by-event-name db event-name)
         reducer (partial process-event-handler event)]
     (reduce reducer db handlers)))
 
 
+(defn- validate-event
+  [db event]
+  (let [event (event/conform event)
+        _ (eventvalidation/validate db event)]
+    event))
+
+
+(defn handle-event
+  [db event]
+  (tap> [::handle-event event])
+  (handle-event- db (validate-event db event)))
+
+
 (defn handle-events
   [db events]
-  (reduce handle-event db events))
+  (tap> [::handle-events events])
+  (reduce handle-event
+          db
+          (map (partial validate-event db)
+               events)))
 
 
 (def-bindscript ::full-stack
+
   db          {:stuff #{}}
+  db          (registration/reg-eventmodel db {:name :some/event})
+
   event       {:app/event :some/event
                :param-1 23
                :param-2 42}

@@ -6,10 +6,15 @@
    [appkernel.projection :as projection]))
 
 (defn new-projection
-  [name args]
-  {:name name
-   :args {}})
-   ;; :events '()})
+  [projector]
+  (let [name (:name projector)
+        args {}
+        init-f (:init-projection-f projector)
+        projection {:name name
+                    :args {}}]
+    (if init-f
+      (init-f projection)
+      projection)))
 
 
 (defn- assoc-projection
@@ -18,7 +23,7 @@
         name (:name projector)
         args {}
         projection (get-in transaction [:db :appkernel/projections name args])
-        projection (if projection projection (new-projection name args))]
+        projection (if projection projection (new-projection projector))]
     (assoc transaction :projection projection)))
 
 

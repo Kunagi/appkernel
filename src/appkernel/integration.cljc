@@ -4,6 +4,7 @@
   (:require
    [appkernel.logging]))
 
+(defonce !dev-mode (atom false))
 (defonce !app-db (atom {}))
 
 
@@ -30,7 +31,19 @@
   (@!update-db f))
 
 
+(defn dev-mode?
+  []
+  @!dev-mode)
+
+
 (defn db
   "Get the current app-db."
   []
   (@!db))
+
+
+(defn activate-dev-mode
+  []
+  (tap> ::activate-dev-mode)
+  (reset! !dev-mode true)
+  (update-db #(assoc % :dev-mode? true)))

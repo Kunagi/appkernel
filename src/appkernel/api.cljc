@@ -2,11 +2,31 @@
   (:require
    [bindscript.api :refer [def-bindscript]]
 
+   [appkernel.integration :as integration]
    [appkernel.registration :as registration]
    [appkernel.query-responder :as query-responder]
    [appkernel.querying :as querying]
    [appkernel.eventhandling :as eventhandling]
    [appkernel.transacting :as transacting]))
+
+
+(def dev-mode? integration/dev-mode?)
+
+
+;;; direct state manipulation
+
+
+(defn update-db!
+  [update-fn & args]
+  (tap> ::update-db)
+  (integration/update-db #(apply update-fn (into [%] args))))
+
+
+(defn assoc-in-db!
+  [path value]
+  (tap> [::assoc-in-db {:path path :value value}])
+  (integration/update-db #(assoc-in % path value)))
+
 
 ;;; query
 
@@ -18,6 +38,15 @@
 (defn execute-query-sync-and-merge-results
   [db query]
   (querying/execute-query-sync-and-merge-results db query))
+
+
+;;; event
+
+
+(defn dispatch
+  [event]
+  (tap> [::dispatch event])
+  (eventhandling/handle-event (integration/db) event))
 
 
 ;;; command
@@ -43,6 +72,19 @@
 (defn def-projector
   [name & {:as projector}]
   (registration/def-projector (assoc projector :name name)))
+
+
+(defn start!
+  "Starts the application by dispatching the `:appkernel/app-started` event.
+
+  This function must be called from a function in the application's entry
+  namespace. This is because the entry namespace must require all other
+  used namesapces before calling this function."
+  []
+  (dispatch [:appkernel/app-started {}]))
+
+
+;;; integration test
 
 
 (def-bindscript ::projecting

@@ -5,8 +5,8 @@
 
 (defn conform
   [event]
-  (let [event-name (:event event)]
+  (let [event-name (:app/event event)]
     (if-not event-name
-      (throw (ex-info (str "Event is missing :event.")
+      (throw (ex-info (str "Event is missing :app/event.")
                       {:event event})))
     event))

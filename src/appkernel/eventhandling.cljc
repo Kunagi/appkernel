@@ -3,6 +3,7 @@
    [clojure.spec.alpha :as s]
    [bindscript.api :refer [def-bindscript]]
 
+   [appkernel.event :as event]
    [appkernel.registration :as registration]))
 
 
@@ -19,10 +20,9 @@
 (defn process-event-handler
   [event db handler]
   (validate-event-handler-result
-    (let [event-args (second event)
-          f (:f handler)]
+    (let [f (:f handler)]
       (try
-        (f db event-args)
+        (f db event)
         (catch #?(:cljs :default :clj Exception) ex
           (throw (ex-info (str "Event handler " (:name handler) " failed.")
                           {:event event
@@ -35,8 +35,8 @@
 (defn handle-event
   [db event]
   (tap> [::handle-event event])
-  ;; TODO conform event
-  (let [event-name (first event)
+  (let [event (event/conform event)
+        event-name (:app/event event)
         handlers (registration/event-handlers-by-event-name db event-name)
         reducer (partial process-event-handler event)]
     (reduce reducer db handlers)))
@@ -49,20 +49,22 @@
 
 (def-bindscript ::full-stack
   db          {:stuff #{}}
-  event       [:some/event {:param-1 23}]
+  event       {:app/event :some/event
+               :param-1 23
+               :param-2 42}
 
   result      (handle-event db event)
 
   handler-1   {:name :some/handler-1
                :event :some/event
-               :f (fn [db args] (update db :stuff conj "h1"))}
+               :f (fn [db event] (update db :stuff conj (:param-1 event)))}
   handler-2   {:name :some/handler-2
                :event :some/event
-               :f (fn [db args] (update db :stuff conj "h2"))}
+               :f (fn [db event] (update db :stuff conj (:param-2 event)))}
 
   db          (registration/reg-event-handler db handler-1)
   db          (registration/reg-event-handler db handler-2)
 
   db          (handle-event db event)
   stuff       (:stuff db)
-  :spec       #(= % #{"h1" "h2"}))
+  :spec       #(= % #{23 42}))

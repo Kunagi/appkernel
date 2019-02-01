@@ -49,12 +49,12 @@
   (eventhandling/handle-event (integration/db) event))
 
 
-;;; command
-
 (defn def-event-handler
   [name & {:as event-handler}]
   (registration/def-event-handler (assoc event-handler :name name)))
 
+
+;;; command
 
 (defn def-command-handler
   [name & {:as command-handler}]
@@ -81,7 +81,7 @@
   namespace. This is because the entry namespace must require all other
   used namesapces before calling this function."
   []
-  (dispatch [:appkernel/app-started {}]))
+  (dispatch {:app/event :app/started}))
 
 
 ;;; integration test
@@ -89,8 +89,8 @@
 
 (def-bindscript ::projecting
   db          {:stuff #{}}
-  event-1     [:some/event-1 {:param-1 23}]
-  event-2     [:some/event-2 {:param-1 23}]
+  event-1     {:app/event :some/event-1 :param-1 23}
+  event-2     {:app/event :some/event-2 :param-1 23}
 
   result      (eventhandling/handle-event db event-1)
 

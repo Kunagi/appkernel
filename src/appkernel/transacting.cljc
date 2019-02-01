@@ -51,11 +51,6 @@
   [tx]
   (update tx :events #(mapv event/conform %)))
 
-(defn- store-tx
-  [tx]
-  ;; TODO
-  tx)
-
 
 (defn- with-try-catch
   [tx message f & args]
@@ -74,8 +69,7 @@
       (with-try-catch "load command handler" load-command-handler)
       (with-try-catch "load aggregate" load-aggregate)
       (with-try-catch "run command handler" run-command-handler)
-      (with-try-catch "conform events" conform-events)
-      (store-tx)))
+      (with-try-catch "conform events" conform-events)))
 
 
 (defn transact!

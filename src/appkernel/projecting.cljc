@@ -10,11 +10,12 @@
   (let [name (:name projector)
         args {}
         init-f (:init-projection-f projector)
-        projection {:name name
-                    :args {}}]
-    (if init-f
-      (init-f projection)
-      projection)))
+        projection {:projection/name name
+                    :projection/args {}}]
+    (projection/conform
+      (if init-f
+        (init-f projection)
+        projection))))
 
 
 (defn- assoc-projection
@@ -45,8 +46,8 @@
   [transaction]
   (let [db (:db transaction)
         projection (:projection transaction)
-        projection-name (:name projection)
-        projection-args (:args projection)]
+        projection-name (:projection/name projection)
+        projection-args (:projection/args projection)]
     (assoc-in transaction
               [:db :appkernel/projections projection-name projection-args]
               projection)))

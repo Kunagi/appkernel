@@ -10,16 +10,26 @@
 (defn- assoc-name
   [event-handler event-name projector-name]
   (let [name-namespace (namespace projector-name)
-        name-name (str (name projector-name) "." event-name)]
+        name-name (str (name projector-name) "." (name event-name))]
     (assoc event-handler :name (keyword name-namespace name-name))))
 
 
-(defn- promote-event-handler
-  "Convert projector `event-handler` to db event handler."
+(defn- provide-f-for-event-handler
+  [event-handler]
+  (if-let [f (:f event-handler)]
+    f
+    (if-let [db-f (:db-f event-handler)]
+      (fn [projection event]
+        (update projection :db db-f event)))))
+
+
+(defn- projector-event-handler->app-event-handler
+  "Convert projector `event-handler` to app event handler."
   [event-handler projector]
   (let [event-name (:event event-handler)
-        f (:f event-handler)
-        projector-name (:name projector)]
+        f (provide-f-for-event-handler event-handler)
+        projector-name (:name projector)
+        event-handler {:event event-name :f f}]
 
     ;; :event is required
     (if-not event-name
@@ -66,6 +76,6 @@
                       {:projector projector})))
     (-> projector
         (assoc :event-handlers
-               (mapv #(promote-event-handler % projector)
+               (mapv #(projector-event-handler->app-event-handler % projector)
                      event-handlers))
         (assoc :query-responder (new-query-responder projector)))))

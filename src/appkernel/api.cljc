@@ -40,6 +40,14 @@
   (querying/execute-query-sync-and-merge-results db query))
 
 
+(defn q [db query]
+  (querying/execute-query-sync-and-merge-results db query))
+
+(defn q-1 [db query]
+  (first
+   (querying/execute-query-sync-and-merge-results db query)))
+
+
 ;;; event
 
 

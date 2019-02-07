@@ -3,26 +3,41 @@
    [clojure.spec.alpha :as s]
    [bindscript.api :refer [def-bindscript]]
 
-   [appkernel.registration :as registration]))
+   [appkernel.registration :as registration]
+   [appkernel.query :as query]))
 
+
+(defn conform-responder-response-value
+  [value]
+  (if-not (or (vector? value)
+              (list? value)
+              (set? value))
+    (throw (ex-info "Response value needs to be vector, list or set"
+                    {:value value})))
+  value)
 
 (defn integrate-responder-to-result
   "Runs the responders function and integrates the result."
   [db result responder]
-  ;;TODO try-catch
-  (let [query-args (get-in result [:query :args])
-        f (:f responder)
-        response-value (f db query-args)
-        response {:value response-value
-                  :responder (:name responder)}]
-    (update result :responses conj response)))
+  (try
+    (let [query-args (get-in result [:query 1])
+          f (:f responder)
+          response-value (f db query-args)
+          response-value (conform-responder-response-value response-value)
+          response {:value response-value
+                    :responder (:name responder)}]
+      (update result :responses conj response))
+    (catch #?(:cljs :default :clj Exception) ex
+      (throw (ex-info (str "Query responder failed: " (:name responder))
+                      {:responder responder}
+                      ex)))))
 
 
 (defn execute-query-sync
   [db query]
   (tap> [::execute-query-sync query])
-  ;; TODO conform query
-  (let [query-name (first query)
+  (let [query (query/conform query)
+        query-name (first query)
         responders (registration/query-responders-by-query-name db query-name)
         result {:query query
                 :responses []}
@@ -51,7 +66,8 @@
                :f (fn [db args] [:a :b :c])}
   responder-2 {:name :some/responder-2
                :query :some/query
-               :f (fn [db args] [:x :y :z])}
+               :f (fn [db args]
+                    [:x :y :z])}
   db          (registration/reg-query-responder db responder-1)
   db          (registration/reg-query-responder db responder-2)
 

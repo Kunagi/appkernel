@@ -8,7 +8,7 @@
    [appkernel.event-handler :as event-handler]
    [appkernel.projector :as projector]
    [appkernel.command-handler :as command-handler]
-   [appkernel.eventmodel :as eventmodel]))
+   [appkernel.event-model :as event-model]))
 
 
 ;;; models
@@ -25,16 +25,15 @@
   (get-in db [:appkernel/models type model-name]))
 
 
-(defn reg-eventmodel
+(defn reg-event-model
   [db model]
-  (reg-model db model :event eventmodel/conform))
+  (reg-model db model :event event-model/conform))
 
 
-(defn def-eventmodel
+(defn def-event-model
   [model]
-  (tap> [::def-eventmodel (:name model)])
-  (integration/update-db #(reg-eventmodel % model)))
-
+  (tap> [::def-event-model (:name model)])
+  (integration/update-db #(reg-event-model % model)))
 
 
 ;;; queries

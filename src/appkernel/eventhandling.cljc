@@ -66,7 +66,7 @@
 (def-bindscript ::full-stack
 
   db          {:stuff #{}}
-  db          (registration/reg-eventmodel db {:name :some/event})
+  db          (registration/reg-event-model db {:name :some/event})
 
   event       {:app/event :some/event
                :param-1 23

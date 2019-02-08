@@ -4,7 +4,8 @@
 
    [appkernel.registration :as registration]
    [appkernel.event :as event]
-   [appkernel.command :as command]))
+   [appkernel.command :as command]
+   [appkernel.eventhandling :as eventhandling]))
 
 
 (defn- new-tx
@@ -52,6 +53,11 @@
   (update tx :events #(mapv event/conform %)))
 
 
+(defn- handle-events
+  [tx]
+  (update tx :db eventhandling/handle-events (:events tx)))
+
+
 (defn- with-try-catch
   [tx message f & args]
   (try
@@ -69,7 +75,8 @@
       (with-try-catch "load command handler" load-command-handler)
       (with-try-catch "load aggregate" load-aggregate)
       (with-try-catch "run command handler" run-command-handler)
-      (with-try-catch "conform events" conform-events)))
+      (with-try-catch "conform events" conform-events)
+      (with-try-catch "handle events" handle-events)))
 
 
 (defn transact!

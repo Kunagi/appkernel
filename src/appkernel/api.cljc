@@ -12,6 +12,18 @@
 
 (def dev-mode? integration/dev-mode?)
 
+;;; utils
+
+(defn new-uuid
+  []
+  (str
+   #?(:cljs (random-uuid)
+      :clj (java.util.UUID/randomUUID))))
+
+(defn current-time-millis
+  []
+  #?(:cljs (.getTime (js/Date.))
+     :clj (System/currentTimeMillis)))
 
 ;;; direct state manipulation
 
@@ -56,7 +68,7 @@
   (tap> [::dispatch event])
   (if-let [dispatch-f (integration/dispatch-f)]
     (dispatch-f event)
-    (eventhandling/handle-event (integration/db) event)))
+    (integration/update-db #(eventhandling/handle-event % event)))) ; TODO alternative: command
 
 
 (defn def-event-handler
@@ -67,16 +79,9 @@
 
 ;;; command
 
-(defn def-command-handler
+(defn def-command
   [name & {:as command-handler}]
   (registration/def-command-handler (assoc command-handler :command name)))
-
-
-(defn !!
-  "Execute command and transact."
-  [command]
-  (transacting/transact! command))
-
 
 
 ;;; projections
@@ -90,16 +95,15 @@
 ;;; models
 
 
-(defn def-eventmodel
+(defn def-event
   [name & {:as model}]
-  (registration/def-eventmodel (assoc model :name name)))
-
+  (registration/def-event-model (assoc model :name name)))
 
 
 ;;; app startup
 
 
-(def-eventmodel :app/started)
+(def-event :app/started)
 
 
 (defn start!
@@ -118,8 +122,8 @@
 (def-bindscript ::projecting
   db          {:stuff #{}}
 
-  db          (registration/reg-eventmodel db {:name :some/event-1})
-  db          (registration/reg-eventmodel db {:name :some/event-2})
+  db          (registration/reg-event-model db {:name :some/event-1})
+  db          (registration/reg-event-model db {:name :some/event-2})
 
   event-1     {:app/event :some/event-1 :param-1 23}
   event-2     {:app/event :some/event-2 :param-1 23}

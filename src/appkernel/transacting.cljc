@@ -38,7 +38,7 @@
   (let [f (:f tx)
         command (:command tx)
         command-name (:app/command command)
-        command-args (second command)]
+        command-args command]
     (try
       (let [events (f command-args)]
         (assoc tx :events events))
@@ -86,10 +86,14 @@
 
 (def-bindscript ::full-stack
   db      {}
-  command {:app/command :do/something :arg "a-1"}
+  db      (registration/reg-event-model db {:name :something/done})
+  command {:app/command :do/something
+           :a1 "a-1"}
 
   handler {:command :do/something
-           :f (fn [args] [{:app/event :something/done}])}
+           :f (fn [args]
+                [{:app/event :something/done
+                  :command-args args}])}
   db      (registration/reg-command-handler db handler)
 
   tx      (transact db command))

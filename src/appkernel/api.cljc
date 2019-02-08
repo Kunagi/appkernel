@@ -149,7 +149,7 @@
                       db
                       [:some/projection {}]))
 
-  :spec       #(= % {:name :some/projection
+  :spec       #(= % {:projection/name :some/projection
                      :args {}
                      :h1 true
                      :h2 true}))

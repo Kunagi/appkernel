@@ -7,7 +7,8 @@
    [appkernel.query-responder :as query-responder]
    [appkernel.querying :as querying]
    [appkernel.eventhandling :as eventhandling]
-   [appkernel.transacting :as transacting]))
+   [appkernel.transacting :as transacting]
+   [appkernel.configuration :as configuration]))
 
 
 (def dev-mode? integration/dev-mode?)
@@ -112,7 +113,8 @@
   This function must be called from a function in the application's entry
   namespace. This is because the entry namespace must require all other
   used namesapces before calling this function."
-  []
+  [config]
+  (configuration/configure config)
   (dispatch {:app/event :app/started}))
 
 

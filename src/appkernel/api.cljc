@@ -26,7 +26,12 @@
   #?(:cljs (.getTime (js/Date.))
      :clj (System/currentTimeMillis)))
 
-;;; direct state manipulation
+
+
+;;; direct state access and manipulation
+
+
+(def db integration/db)
 
 
 (defn update-db!

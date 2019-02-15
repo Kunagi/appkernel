@@ -56,10 +56,15 @@
 (defn q [db query]
   (querying/execute-query-sync-and-merge-results db query))
 
+(defn q! [query]
+  (q (integration/db) query))
+
 (defn q-1 [db query]
   (first
    (querying/execute-query-sync-and-merge-results db query)))
 
+(defn q-1! [query]
+  (q-1 (integration/db) query))
 
 ;;; event
 

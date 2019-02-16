@@ -114,7 +114,8 @@
 ;;; app startup
 
 
-(def-event :app/started)
+(def-event :app/started
+ :doc "Application started.")
 
 
 (defn start!

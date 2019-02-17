@@ -11,9 +11,13 @@
         path (.getAbsolutePath file)]
     (tap> [::configs-dir configs-dir])
     (if (.exists file)
-      (let [config (read-string (slurp file))]
-        (tap> [::load-configuration {:file path :config config}])
-        config)
+      (try
+        (let [config (read-string (slurp file))]
+          (tap> [::load-configuration {:file path :config config}])
+          config)
+        (catch Exception ex
+          (throw (ex-info (str "Failed to read file " (.getAbsolutePath file))
+                          {:file file}))))
       (do
         (tap> [::load-configuration {:file path :config nil}])
         nil))))

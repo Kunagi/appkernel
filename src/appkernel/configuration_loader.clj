@@ -5,8 +5,9 @@
    [appkernel.paths :as paths]))
 
 (defn load-configuration
-  []
-  (let [configs-dir (paths/configs-dir)
+  [app-name]
+  (let [app-name (paths/configs-dir app-name)
+        configs-dir app-name
         file (io/as-file (str configs-dir "/config.edn"))
         path (.getAbsolutePath file)]
     (tap> [::configs-dir configs-dir])

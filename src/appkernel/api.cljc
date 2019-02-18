@@ -125,6 +125,9 @@
   namespace. This is because the entry namespace must require all other
   used namesapces before calling this function."
   [config]
+  (when-not (:app/name config)
+    (throw (ex-info "Missing :app/name in config."
+                    {:config config})))
   (configuration/configure config)
   (dispatch {:app/event :app/started}))
 

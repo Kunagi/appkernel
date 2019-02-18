@@ -18,5 +18,5 @@
 (defn configure
   [config]
   (-> config
-      (utils/deep-merge (configuration-loader/load-configuration))
+      (utils/deep-merge (configuration-loader/load-configuration (:app/name config)))
       (merge-into-db!)))

@@ -13,4 +13,6 @@
     (if-not (qualified-keyword? model-name)
       (throw (ex-info (str "Event-Model name needs to be a qualified keyword.")
                       {:model model})))
-    model))
+    (-> model
+        (assoc :transient? (or (:transient? model) false))
+        (assoc :doc (or (:doc model) (name model-name))))))

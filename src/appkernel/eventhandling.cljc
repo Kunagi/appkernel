@@ -57,7 +57,7 @@
 (defn handle-events
   [db events]
   (tap> [::handle-events events])
-  (reduce handle-event
+  (reduce handle-event-
           db
           (map (partial validate-event db)
                events)))

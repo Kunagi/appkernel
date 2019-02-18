@@ -118,7 +118,8 @@
 
 
 (def-event :app/started
- :doc "Application started.")
+ :doc "Application started."
+ :transient? true)
 
 
 (defn start!

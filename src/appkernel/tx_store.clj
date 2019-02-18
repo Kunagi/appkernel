@@ -4,6 +4,7 @@
    [clojure.edn :as edn]
 
    [appkernel.integration :as integration]
+   [appkernel.registration :as registration]
    [appkernel.paths :as paths]))
 
 
@@ -17,7 +18,7 @@
                  (edn/read-string (slurp offset-file)))
         store {:path path
                :offset offset}]
-    (tap> [:inf ::loaded store])
+    (tap> [::loaded store])
     store))
 
 
@@ -29,11 +30,20 @@
     (str (.substring s 0 s1) "/" (.substring s s1 s2) "/" (.substring s s2))))
 
 
+(defn filter-non-transient-events
+  [db events]
+  (into []
+        (filter
+         #(let [event-name (:app/event %)
+                event-model (registration/model-by-name db :event event-name)]
+            (not (:transient? event-model))))
+        events))
+
 (defn persist-tx
   [store {:as tx :keys [db events]}]
   (let [tx-num (-> store :offset inc)
         tx-data {:num tx-num
-                 :events (:events tx)
+                 :events (filter-non-transient-events db (:events tx))
                  :time (System/currentTimeMillis)}
         tx-path (str (:path store) "/tx/" (num->path tx-num) ".edn")
         offset-path (str (:path store) "/offset")]

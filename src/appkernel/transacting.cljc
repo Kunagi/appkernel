@@ -56,15 +56,27 @@
   (update tx :events #(mapv event/conform %)))
 
 
+;; TODO async?
 (defn- handle-events
   [tx]
   (update tx :db eventhandling/handle-events (:events tx)))
 
 
+(defn- transient?
+  [tx]
+  (empty?
+   (filter
+    #(let [event-name (:app/event %)
+           event-model (registration/model-by-name (:db tx) :event event-name)]
+       (not (:transient? event-model)))
+    (get tx :events))))
+
+
 (defn- persist-tx
   [tx]
-  (when-let [persist (get-in tx [:db :app/persist-tx-f])]
-    (persist tx))
+  (when-not (transient? tx)
+    (when-let [persist (get-in tx [:db :app/persist-tx-f])]
+      (persist tx)))
   tx)
 
 
@@ -80,7 +92,7 @@
 
 (defn transact
   [db command]
-  (tap> [::transact command])
+  ;; (tap> [::transact command])
   (when-not (:app/db db)
     (throw (ex-info "Given db is not app-db."
                     {:db db})))

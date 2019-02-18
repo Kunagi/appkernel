@@ -4,7 +4,7 @@
    [bindscript.api :refer [def-bindscript]]))
 
 
-(defn conform
+(defn- conform-
   [command]
   (if-not (map? command)
     (throw (ex-info (str "Command is not a map.")
@@ -17,3 +17,24 @@
       (throw (ex-info (str "Command name needs to be a qualified keyword.")
                       {:command command})))
     command))
+
+
+(defn- new-event-command
+  [event]
+  {:app/command :app/events
+   :events [event]})
+
+
+(defn- is-event?
+  [command-or-event]
+  (and
+    (not (:app/command command-or-event))
+    (:app/event command-or-event)))
+
+
+(defn conform
+  [command]
+  ;; Support events as commands
+  (if (is-event? command)
+    (new-event-command command)
+    (conform- command)))

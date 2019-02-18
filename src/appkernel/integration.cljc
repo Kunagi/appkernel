@@ -9,7 +9,12 @@
 (defonce !dispatch-f (atom nil))
 
 
-(defonce !update-db (atom (fn [f] (swap! !app-db f))))
+(defonce !update-db (atom (fn [f]
+                            (try
+                              (swap! !app-db f)
+                              (catch #?(:cljs :default :clj Exception) ex
+                                (tap> [:err ::update-db-failed ex]))))))
+
 
 (defonce !db-f (atom (fn [] @!app-db)))
 

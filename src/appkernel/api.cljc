@@ -8,7 +8,8 @@
    [appkernel.querying :as querying]
    [appkernel.eventhandling :as eventhandling]
    [appkernel.transacting :as transacting]
-   [appkernel.configuration :as configuration]))
+   [appkernel.configuration :as configuration]
+   [appkernel.builtin-commands]))
 
 
 (def dev-mode? integration/dev-mode?)
@@ -71,15 +72,10 @@
 (defn q-1! [query]
   (q-1 (integration/db) query))
 
+
+
 ;;; event
 
-
-(defn dispatch
-  [event]
-  (tap> [::dispatch event])
-  (if-let [dispatch-f (integration/dispatch-f)]
-    (dispatch-f event)
-    (integration/update-db #(eventhandling/handle-event % event)))) ; TODO alternative: command
 
 
 (defn def-event-handler
@@ -90,9 +86,15 @@
 
 ;;; command
 
+
 (defn def-command
   [name & {:as command-handler}]
   (registration/def-command-handler (assoc command-handler :command name)))
+
+
+(defn dispatch
+  [command]
+  (transacting/transact! command))
 
 
 ;;; projections
@@ -130,6 +132,7 @@
                     {:config config})))
   (configuration/configure config)
   (dispatch {:app/event :app/started}))
+
 
 
 ;;; integration test

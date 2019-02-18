@@ -2,6 +2,7 @@
   (:require
    [bindscript.api :refer [def-bindscript]]
 
+   [appkernel.integration :as integration]
    [appkernel.registration :as registration]
    [appkernel.event :as event]
    [appkernel.command :as command]
@@ -70,7 +71,7 @@
 
 (defn transact
   [db command]
-  (tap> [::transact command])
+  (tap> [:inf ::transact command])
   (-> (new-tx db command)
       (with-try-catch "load command handler" load-command-handler)
       (with-try-catch "load aggregate" load-aggregate)
@@ -81,7 +82,10 @@
 
 (defn transact!
   [command]
-  (tap> [::transact! :error command]))
+  (tap> [::transact! :error command])
+  (if-let [dispatch-f (integration/dispatch-f)]
+    (dispatch-f command)
+    (integration/update-db #(transact % command))))
 
 
 (def-bindscript ::full-stack

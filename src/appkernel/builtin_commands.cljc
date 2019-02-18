@@ -4,6 +4,6 @@
 
 
 (registration/def-command-handler
-  {:command :app/events
+  {:command :app/passthrough-events
    :f (fn [args]
         (:events args))})

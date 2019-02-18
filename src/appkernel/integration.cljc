@@ -4,9 +4,12 @@
   (:require
    [appkernel.logging]))
 
+(def empty-app-db {:app/db :app/db})
+
 (defonce !dev-mode (atom false))
-(defonce !app-db #?(:cljs (atom {})
-                    :clj (agent {}
+(defonce !app-db #?(:cljs (atom empty-app-db)
+                    :clj (agent
+                          empty-app-db
                           :error-mode :continue
                           :error-handler (fn [agent ex]
                                            (tap> [:err ::update-db-failed ex])))))
@@ -15,11 +18,8 @@
 
 
 (defonce !update-db (atom (fn [f]
-                            (#?(:cljs swap! :clj send-off) !app-db f))))
-                            ;; (try
-                            ;;   (swap! !app-db f)
-                            ;;   (catch #?(:cljs :default :clj Exception) ex
-                            ;;     (tap> [:err ::update-db-failed ex]))))))
+                            #?(:cljs (swap! !app-db f)
+                               :clj (send-off !app-db f)))))
 
 
 (defonce !db-f (atom (fn [] @!app-db)))

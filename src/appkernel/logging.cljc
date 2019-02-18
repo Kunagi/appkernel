@@ -14,7 +14,7 @@
 (defonce !printer (atom log-record))
 
 
-(def levels #{:dbg :inf :wrn :err})
+(def levels #{:!!! :dbg :inf :wrn :err})
 
 
 (defn vector-with-level-and-source->record

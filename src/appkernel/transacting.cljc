@@ -24,8 +24,10 @@
         handler (registration/command-handler-by-command-name db command-name)]
     (if handler (assoc tx :command-handler handler
                           :f (:f handler))
-      (throw (ex-info (str "Missing handler for " command-name)
-                      {:command command})))))
+      (throw (ex-info (str "Missing command handler for command " command-name)
+                      {:command command-name
+                       :registered-handlers (registration/command-handler-names db)
+                       :db (-> db keys)})))))
 
 
 (defn- load-aggregate
@@ -59,6 +61,13 @@
   (update tx :db eventhandling/handle-events (:events tx)))
 
 
+(defn- persist-tx
+  [tx]
+  (when-let [persist (get-in tx [:db :app/persist-tx-f])]
+    (persist tx))
+  tx)
+
+
 (defn- with-try-catch
   [tx message f & args]
   (try
@@ -71,21 +80,29 @@
 
 (defn transact
   [db command]
-  (tap> [:inf ::transact command])
+  (tap> [::transact command])
+  (when-not (:app/db db)
+    (throw (ex-info "Given db is not app-db."
+                    {:db db})))
   (-> (new-tx db command)
       (with-try-catch "load command handler" load-command-handler)
       (with-try-catch "load aggregate" load-aggregate)
       (with-try-catch "run command handler" run-command-handler)
       (with-try-catch "conform events" conform-events)
-      (with-try-catch "handle events" handle-events)))
+      (with-try-catch "handle events" handle-events)
+      (with-try-catch "persist tx" persist-tx)))
 
 
 (defn transact!
   [command]
-  (tap> [::transact! :error command])
+  (tap> [:inf ::transact! command])
   (if-let [dispatch-f (integration/dispatch-f)]
     (dispatch-f command)
-    (integration/update-db #(transact % command))))
+    (integration/update-db
+     (fn [db]
+       (-> db
+           (transact command)
+           :db)))))
 
 
 (def-bindscript ::full-stack

@@ -21,7 +21,7 @@
 
 (defn- new-event-command
   [event]
-  {:app/command :app/events
+  {:app/command :app/passthrough-events
    :events [event]})
 
 

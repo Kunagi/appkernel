@@ -120,7 +120,7 @@
 
 (defn def-command-handler
   [handler]
-  (tap> [::def-command-handler (:name handler)])
+  (tap> [::def-command-handler (:command handler)])
   (integration/update-db #(reg-command-handler % handler)))
 
 
@@ -129,3 +129,6 @@
   (get-in db [:appkernel/command-handlers command-name]))
 
 
+(defn command-handler-names
+  [db]
+  (-> db :appkernel/command-handlers keys))

@@ -8,6 +8,3 @@
       (str "/etc/" app-name))))
 
 
-(defn data-dir
-  [app-name]
-  (-> "user.home" System/getProperty java.io.File. .getPath))

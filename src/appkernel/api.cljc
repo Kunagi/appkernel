@@ -9,7 +9,8 @@
    [appkernel.eventhandling :as eventhandling]
    [appkernel.transacting :as transacting]
    [appkernel.configuration :as configuration]
-   [appkernel.builtin-commands]))
+   [appkernel.builtin-commands]
+   [appkernel.tx-store :as tx-store]))
 
 
 (def dev-mode? integration/dev-mode?)
@@ -131,6 +132,7 @@
     (throw (ex-info "Missing :app/name in config."
                     {:config config})))
   (configuration/configure config)
+  (tx-store/install!)
   (dispatch {:app/event :app/started}))
 
 

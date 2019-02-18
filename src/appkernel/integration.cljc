@@ -5,15 +5,21 @@
    [appkernel.logging]))
 
 (defonce !dev-mode (atom false))
-(defonce !app-db (atom {}))
+(defonce !app-db #?(:cljs (atom {})
+                    :clj (agent {}
+                          :error-mode :continue
+                          :error-handler (fn [agent ex]
+                                           (tap> [:err ::update-db-failed ex])))))
+
 (defonce !dispatch-f (atom nil))
 
 
 (defonce !update-db (atom (fn [f]
-                            (try
-                              (swap! !app-db f)
-                              (catch #?(:cljs :default :clj Exception) ex
-                                (tap> [:err ::update-db-failed ex]))))))
+                            (#?(:cljs swap! :clj send-off) !app-db f))))
+                            ;; (try
+                            ;;   (swap! !app-db f)
+                            ;;   (catch #?(:cljs :default :clj Exception) ex
+                            ;;     (tap> [:err ::update-db-failed ex]))))))
 
 
 (defonce !db-f (atom (fn [] @!app-db)))

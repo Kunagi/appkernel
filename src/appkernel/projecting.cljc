@@ -53,7 +53,7 @@
               projection)))
 
 
-(defn handle-event
+(defn- handle-event
   [projector projection-event-handler db event-args]
   (-> {:projector projector
        :projection-event-handler projection-event-handler

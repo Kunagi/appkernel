@@ -8,19 +8,21 @@
 
 (defonce !dev-mode (atom false))
 (defonce !app-db #?(:cljs (atom empty-app-db)
-                    :clj (agent
-                          empty-app-db
-                          :error-mode :continue
-                          :error-handler (fn [agent ex]
-                                           (-> ex .printStackTrace)
-                                           (tap> [:err ::update-db-failed ex])))))
+                    :clj  (atom empty-app-db)))
+                    ;; :clj (agent
+                    ;;       empty-app-db
+                    ;;       :error-mode :continue
+                    ;;       :error-handler (fn [agent ex]
+                    ;;                        (-> ex .printStackTrace)
+                    ;;                        (tap> [:err ::update-db-failed ex])))))
 
 (defonce !dispatch-f (atom nil))
 
 
 (defonce !update-db (atom (fn [f]
                             #?(:cljs (swap! !app-db f)
-                               :clj (send !app-db f)))))
+                               :clj  (swap! !app-db f)))))
+                               ;; :clj (send-off !app-db f)))))
 
 
 (defonce !db-f (atom (fn [] @!app-db)))

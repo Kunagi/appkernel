@@ -1,5 +1,6 @@
 {:own [
        witek/browser-headsup
-       witek/bindscript]
+       witek/bindscript
+       kunagi/model-driver]
 
  :foreign {}}

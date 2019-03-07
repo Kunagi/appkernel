@@ -2,6 +2,8 @@
   (:require
    [bindscript.api :refer [def-bindscript]]
 
+   [model-driver.model.api :as domain-model]
+
    [appkernel.integration :as integration]
    [appkernel.registration :as registration]
    [appkernel.query-responder :as query-responder]
@@ -133,6 +135,11 @@
     (throw (ex-info "Missing :app/name in config."
                     {:config config})))
   (configuration/configure config)
+  (integration/update-db
+   (fn [db]
+     (assoc db
+            :domain-model/model
+            (domain-model/load-from-events (:domain-model/modules-events config)))))
   (tx-store/install!)
   (dispatch {:app/event :app/started}))
 

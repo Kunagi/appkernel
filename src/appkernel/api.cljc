@@ -3,6 +3,7 @@
    [bindscript.api :refer [def-bindscript]]
 
    [model-driver.model.api :as domain-model]
+   [model-driver.runtime.api :as model-driver]
 
    [appkernel.integration :as integration]
    [appkernel.registration :as registration]
@@ -137,9 +138,8 @@
   (configuration/configure config)
   (integration/update-db
    (fn [db]
-     (assoc db
-            :domain-model/model
-            (domain-model/load-from-events (:domain-model/modules-events config)))))
+     (-> db
+         (model-driver/initialize config ))))
   (tx-store/install!)
   (dispatch {:app/event :app/started}))
 
